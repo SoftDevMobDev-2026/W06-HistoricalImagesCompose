@@ -1,6 +1,12 @@
 package com.example.w06_historicalimages_compose
 
+
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -11,20 +17,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
 
-class MainActivity : ComponentActivity() {
+
+class MainActivityVM : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -38,8 +42,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen() {
-    var currentImage by rememberSaveable() { mutableStateOf("station") }
+fun MainScreenVM(viewModel: ImageViewModel = viewModel() ) {
+    val currentImage by viewModel.currentImage.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -51,31 +55,30 @@ fun MainScreen() {
         }
 
 //        Box {
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = "station",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .fillMaxWidth()
+        Image(
+            painter = painterResource(id = imageRes),
+            contentDescription = "station",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxWidth()
 //                    .weight(10f)
-            )
+        )
 //        }
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(10f),
-            verticalAlignment = Alignment.Bottom
         ) {
             Button(
-                onClick = { currentImage = "station" },
+                onClick = { viewModel.selectImage("station") },
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
                 Text("Station")
             }
 
             Button(
-                onClick = { currentImage = "college" },
+                onClick = { viewModel.selectImage("college") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Green),
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
@@ -83,13 +86,13 @@ fun MainScreen() {
             }
 
             Button(
-                onClick = { currentImage = "theatre" },
+                onClick = { viewModel.selectImage("theatre") },
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
                 Text("Theatre")
             }
             Button(
-                onClick = { currentImage = "station" },
+                onClick = { viewModel.selectImage("station") },
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
                 Text("Reset")
@@ -103,3 +106,14 @@ fun MainScreen() {
         )
     }
 }
+
+class ImageViewModel : ViewModel(){
+
+    private val _currImage = MutableStateFlow("Station")
+    val currentImage : StateFlow<String> = _currImage.asStateFlow()
+
+    fun selectImage(image: String){
+        _currImage.value = image
+    }
+}
+
